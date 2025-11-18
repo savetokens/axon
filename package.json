@@ -1,0 +1,44 @@
+{
+  "name": "axon",
+  "version": "0.5.0",
+  "private": true,
+  "description": "Adaptive eXchange Oriented Notation - Token-efficient data serialization for LLMs",
+  "keywords": [
+    "axon",
+    "serialization",
+    "llm",
+    "data-format",
+    "token-efficiency"
+  ],
+  "author": "Wael",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/savetokens/axon.git"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "scripts": {
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "test:watch": "pnpm -r test -- --watch",
+    "test:coverage": "pnpm -r test -- --coverage",
+    "lint": "eslint \"packages/**/src/**/*.ts\"",
+    "format": "prettier --write \"packages/**/src/**/*.ts\"",
+    "format:check": "prettier --check \"packages/**/src/**/*.ts\"",
+    "typecheck": "pnpm -r typecheck",
+    "clean": "pnpm -r clean && rm -rf node_modules",
+    "dev": "pnpm -r --parallel dev"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@typescript-eslint/eslint-plugin": "^6.19.0",
+    "@typescript-eslint/parser": "^6.19.0",
+    "eslint": "^8.56.0",
+    "prettier": "^3.2.4",
+    "typescript": "^5.3.3",
+    "vitest": "^1.2.0"
+  }
+}

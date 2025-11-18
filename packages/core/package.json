@@ -1,0 +1,60 @@
+{
+  "name": "@axon-format/core",
+  "version": "0.5.1",
+  "description": "AXON core encoder/decoder library",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts --clean",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist",
+    "demo": "tsx demo.ts",
+    "demo:full": "tsx demo-encode-decode.ts",
+    "demo:compare": "tsx demo-comparison.ts",
+    "demo:compression": "tsx demo-compression-showcase.ts"
+  },
+  "keywords": [
+    "axon",
+    "serialization",
+    "encoder",
+    "decoder",
+    "llm",
+    "token-efficiency",
+    "data-format",
+    "compression"
+  ],
+  "author": "Wael",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/savetokens/axon.git",
+    "directory": "packages/core"
+  },
+  "homepage": "https://github.com/savetokens/axon#readme",
+  "bugs": {
+    "url": "https://github.com/savetokens/axon/issues"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@vitest/coverage-v8": "^1.2.0",
+    "tsup": "^8.0.1",
+    "tsx": "^4.20.6",
+    "typescript": "^5.3.3",
+    "vitest": "^1.2.0"
+  }
+}

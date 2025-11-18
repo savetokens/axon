@@ -1,0 +1,5 @@
+users::[4] active:bool|email:str|id:u8|name:str|role:str
+  true|alice@example.com|1|"Alice Johnson"|admin
+  true|bob@example.com|2|"Bob Smith"|user
+  false|charlie@example.com|3|"Charlie Brown"|user
+  true|diana@example.com|4|"Diana Prince"|moderator

@@ -1,0 +1,655 @@
+{
+  "events": [
+    {
+      "id": 1001,
+      "timestamp": "2025-01-15T10:00:00Z",
+      "type": "page_view",
+      "user_id": "550e8400-e29b-41d4-a716-446655440000",
+      "page": "/home",
+      "duration": 45,
+      "metadata": {
+        "device": "mobile",
+        "browser": "Chrome",
+        "version": "120.0.0"
+      },
+      "tags": ["new_user", "organic"],
+      "conversion": null,
+      "revenue": null
+    },
+    {
+      "id": 1002,
+      "timestamp": "2025-01-15T10:01:00Z",
+      "type": "page_view",
+      "user_id": "550e8400-e29b-41d4-a716-446655440001",
+      "page": "/home",
+      "duration": 120,
+      "metadata": {
+        "device": "desktop",
+        "browser": "Chrome",
+        "version": "120.0.0"
+      },
+      "tags": ["returning"],
+      "conversion": null,
+      "revenue": null
+    },
+    {
+      "id": 1003,
+      "timestamp": "2025-01-15T10:02:00Z",
+      "type": "page_view",
+      "user_id": "550e8400-e29b-41d4-a716-446655440002",
+      "page": "/products",
+      "duration": 200,
+      "metadata": {
+        "device": "mobile",
+        "browser": "Safari",
+        "version": "17.2.0"
+      },
+      "tags": ["new_user", "paid_ad"],
+      "conversion": null,
+      "revenue": null
+    },
+    {
+      "id": 1004,
+      "timestamp": "2025-01-15T10:03:00Z",
+      "type": "click",
+      "user_id": "550e8400-e29b-41d4-a716-446655440002",
+      "page": "/products",
+      "duration": 5,
+      "metadata": {
+        "device": "mobile",
+        "browser": "Safari",
+        "version": "17.2.0",
+        "element": "buy_button"
+      },
+      "tags": ["intent"],
+      "conversion": null,
+      "revenue": null
+    },
+    {
+      "id": 1005,
+      "timestamp": "2025-01-15T10:04:00Z",
+      "type": "purchase",
+      "user_id": "550e8400-e29b-41d4-a716-446655440002",
+      "page": "/checkout",
+      "duration": 180,
+      "metadata": {
+        "device": "mobile",
+        "browser": "Safari",
+        "version": "17.2.0",
+        "payment_method": "card"
+      },
+      "tags": ["conversion", "paid_ad"],
+      "conversion": true,
+      "revenue": 49.99
+    },
+    {
+      "id": 1006,
+      "timestamp": "2025-01-15T10:05:00Z",
+      "type": "page_view",
+      "user_id": "550e8400-e29b-41d4-a716-446655440000",
+      "page": "/products",
+      "duration": 90,
+      "metadata": {
+        "device": "mobile",
+        "browser": "Chrome",
+        "version": "120.0.0"
+      },
+      "tags": ["organic"],
+      "conversion": null,
+      "revenue": null
+    },
+    {
+      "id": 1007,
+      "timestamp": "2025-01-15T10:06:00Z",
+      "type": "page_view",
+      "user_id": "550e8400-e29b-41d4-a716-446655440003",
+      "page": "/home",
+      "duration": 60,
+      "metadata": {
+        "device": "desktop",
+        "browser": "Firefox",
+        "version": "121.0.0"
+      },
+      "tags": ["new_user", "organic"],
+      "conversion": null,
+      "revenue": null
+    },
+    {
+      "id": 1008,
+      "timestamp": "2025-01-15T10:07:00Z",
+      "type": "page_view",
+      "user_id": "550e8400-e29b-41d4-a716-446655440004",
+      "page": "/home",
+      "duration": 75,
+      "metadata": {
+        "device": "mobile",
+        "browser": "Chrome",
+        "version": "120.0.0"
+      },
+      "tags": ["new_user", "paid_ad"],
+      "conversion": null,
+      "revenue": null
+    },
+    {
+      "id": 1009,
+      "timestamp": "2025-01-15T10:08:00Z",
+      "type": "page_view",
+      "user_id": "550e8400-e29b-41d4-a716-446655440001",
+      "page": "/products",
+      "duration": 150,
+      "metadata": {
+        "device": "desktop",
+        "browser": "Chrome",
+        "version": "120.0.0"
+      },
+      "tags": ["returning"],
+      "conversion": null,
+      "revenue": null
+    },
+    {
+      "id": 1010,
+      "timestamp": "2025-01-15T10:09:00Z",
+      "type": "click",
+      "user_id": "550e8400-e29b-41d4-a716-446655440001",
+      "page": "/products",
+      "duration": 3,
+      "metadata": {
+        "device": "desktop",
+        "browser": "Chrome",
+        "version": "120.0.0",
+        "element": "add_to_cart"
+      },
+      "tags": ["intent"],
+      "conversion": null,
+      "revenue": null
+    },
+    {
+      "id": 1011,
+      "timestamp": "2025-01-15T10:10:00Z",
+      "type": "page_view",
+      "user_id": "550e8400-e29b-41d4-a716-446655440005",
+      "page": "/home",
+      "duration": 30,
+      "metadata": {
+        "device": "tablet",
+        "browser": "Safari",
+        "version": "17.2.0"
+      },
+      "tags": ["new_user", "organic"],
+      "conversion": null,
+      "revenue": null
+    },
+    {
+      "id": 1012,
+      "timestamp": "2025-01-15T10:11:00Z",
+      "type": "page_view",
+      "user_id": "550e8400-e29b-41d4-a716-446655440006",
+      "page": "/home",
+      "duration": 50,
+      "metadata": {
+        "device": "mobile",
+        "browser": "Chrome",
+        "version": "120.0.0"
+      },
+      "tags": ["new_user", "paid_ad"],
+      "conversion": null,
+      "revenue": null
+    },
+    {
+      "id": 1013,
+      "timestamp": "2025-01-15T10:12:00Z",
+      "type": "page_view",
+      "user_id": "550e8400-e29b-41d4-a716-446655440007",
+      "page": "/products",
+      "duration": 180,
+      "metadata": {
+        "device": "desktop",
+        "browser": "Edge",
+        "version": "120.0.0"
+      },
+      "tags": ["new_user", "organic"],
+      "conversion": null,
+      "revenue": null
+    },
+    {
+      "id": 1014,
+      "timestamp": "2025-01-15T10:13:00Z",
+      "type": "click",
+      "user_id": "550e8400-e29b-41d4-a716-446655440007",
+      "page": "/products",
+      "duration": 4,
+      "metadata": {
+        "device": "desktop",
+        "browser": "Edge",
+        "version": "120.0.0",
+        "element": "buy_button"
+      },
+      "tags": ["intent"],
+      "conversion": null,
+      "revenue": null
+    },
+    {
+      "id": 1015,
+      "timestamp": "2025-01-15T10:14:00Z",
+      "type": "purchase",
+      "user_id": "550e8400-e29b-41d4-a716-446655440007",
+      "page": "/checkout",
+      "duration": 240,
+      "metadata": {
+        "device": "desktop",
+        "browser": "Edge",
+        "version": "120.0.0",
+        "payment_method": "paypal"
+      },
+      "tags": ["conversion", "organic"],
+      "conversion": true,
+      "revenue": 99.99
+    },
+    {
+      "id": 1016,
+      "timestamp": "2025-01-15T10:15:00Z",
+      "type": "page_view",
+      "user_id": "550e8400-e29b-41d4-a716-446655440008",
+      "page": "/home",
+      "duration": 40,
+      "metadata": {
+        "device": "mobile",
+        "browser": "Chrome"
+      },
+      "tags": ["new_user", "organic"],
+      "conversion": null,
+      "revenue": null
+    },
+    {
+      "id": 1017,
+      "timestamp": "2025-01-15T10:16:00Z",
+      "type": "page_view",
+      "user_id": "550e8400-e29b-41d4-a716-446655440009",
+      "page": "/about",
+      "duration": 25,
+      "metadata": {
+        "device": "desktop",
+        "browser": "Chrome",
+        "version": "120.0.0",
+        "referrer": "google.com"
+      },
+      "tags": ["new_user", "organic"],
+      "conversion": null,
+      "revenue": null
+    },
+    {
+      "id": 1018,
+      "timestamp": "2025-01-15T10:17:00Z",
+      "type": "page_view",
+      "user_id": "550e8400-e29b-41d4-a716-446655440010",
+      "page": "/home",
+      "duration": 55,
+      "metadata": {
+        "device": "mobile",
+        "browser": "Chrome",
+        "version": "120.0.0"
+      },
+      "tags": ["new_user", "paid_ad"],
+      "conversion": null,
+      "revenue": null
+    },
+    {
+      "id": 1019,
+      "timestamp": "2025-01-15T10:18:00Z",
+      "type": "page_view",
+      "user_id": "550e8400-e29b-41d4-a716-446655440011",
+      "page": "/products",
+      "duration": 95,
+      "metadata": {
+        "device": "tablet",
+        "browser": "Safari",
+        "version": "17.2.0"
+      },
+      "tags": ["new_user", "organic"],
+      "conversion": null,
+      "revenue": null
+    },
+    {
+      "id": 1020,
+      "timestamp": "2025-01-15T10:19:00Z",
+      "type": "click",
+      "user_id": "550e8400-e29b-41d4-a716-446655440011",
+      "page": "/products",
+      "duration": 2,
+      "metadata": {
+        "device": "tablet",
+        "browser": "Safari",
+        "version": "17.2.0",
+        "element": "product_image"
+      },
+      "tags": ["browsing"],
+      "conversion": null,
+      "revenue": null
+    },
+    {
+      "id": 1021,
+      "timestamp": "2025-01-15T10:20:00Z",
+      "type": "page_view",
+      "user_id": "550e8400-e29b-41d4-a716-446655440012",
+      "page": "/home",
+      "duration": 65,
+      "metadata": {
+        "device": "mobile",
+        "browser": "Chrome",
+        "version": "120.0.0"
+      },
+      "tags": ["new_user", "organic"],
+      "conversion": null,
+      "revenue": null
+    },
+    {
+      "id": 1022,
+      "timestamp": "2025-01-15T10:21:00Z",
+      "type": "page_view",
+      "user_id": "550e8400-e29b-41d4-a716-446655440013",
+      "page": "/products",
+      "duration": 110,
+      "metadata": {
+        "device": "desktop",
+        "browser": "Chrome",
+        "version": "120.0.0"
+      },
+      "tags": ["new_user", "paid_ad"],
+      "conversion": null,
+      "revenue": null
+    },
+    {
+      "id": 1023,
+      "timestamp": "2025-01-15T10:22:00Z",
+      "type": "page_view",
+      "user_id": "550e8400-e29b-41d4-a716-446655440014",
+      "page": "/home",
+      "duration": 35,
+      "metadata": {
+        "device": "mobile",
+        "browser": "Chrome",
+        "version": "120.0.0"
+      },
+      "tags": ["new_user", "organic"],
+      "conversion": null,
+      "revenue": null
+    },
+    {
+      "id": 1024,
+      "timestamp": "2025-01-15T10:23:00Z",
+      "type": "page_view",
+      "user_id": "550e8400-e29b-41d4-a716-446655440015",
+      "page": "/products",
+      "duration": 140,
+      "metadata": {
+        "device": "desktop",
+        "browser": "Firefox",
+        "version": "121.0.0"
+      },
+      "tags": ["new_user", "organic"],
+      "conversion": null,
+      "revenue": null
+    },
+    {
+      "id": 1025,
+      "timestamp": "2025-01-15T10:24:00Z",
+      "type": "click",
+      "user_id": "550e8400-e29b-41d4-a716-446655440015",
+      "page": "/products",
+      "duration": 3,
+      "metadata": {
+        "device": "desktop",
+        "browser": "Firefox",
+        "version": "121.0.0",
+        "element": "buy_button"
+      },
+      "tags": ["intent"],
+      "conversion": null,
+      "revenue": null
+    },
+    {
+      "id": 1026,
+      "timestamp": "2025-01-15T10:25:00Z",
+      "type": "purchase",
+      "user_id": "550e8400-e29b-41d4-a716-446655440015",
+      "page": "/checkout",
+      "duration": 200,
+      "metadata": {
+        "device": "desktop",
+        "browser": "Firefox",
+        "version": "121.0.0",
+        "payment_method": "card",
+        "coupon": "SAVE10"
+      },
+      "tags": ["conversion", "organic"],
+      "conversion": true,
+      "revenue": 149.99
+    },
+    {
+      "id": 1027,
+      "timestamp": "2025-01-15T10:26:00Z",
+      "type": "page_view",
+      "user_id": "550e8400-e29b-41d4-a716-446655440016",
+      "page": "/home",
+      "duration": 45,
+      "metadata": {
+        "device": "mobile",
+        "browser": "Chrome",
+        "version": "120.0.0"
+      },
+      "tags": ["new_user", "paid_ad"],
+      "conversion": null,
+      "revenue": null
+    },
+    {
+      "id": 1028,
+      "timestamp": "2025-01-15T10:27:00Z",
+      "type": "page_view",
+      "user_id": "550e8400-e29b-41d4-a716-446655440017",
+      "page": "/home",
+      "duration": 50,
+      "metadata": {
+        "device": "desktop",
+        "browser": "Chrome",
+        "version": "120.0.0"
+      },
+      "tags": ["new_user", "organic"],
+      "conversion": null,
+      "revenue": null
+    },
+    {
+      "id": 1029,
+      "timestamp": "2025-01-15T10:28:00Z",
+      "type": "page_view",
+      "user_id": "550e8400-e29b-41d4-a716-446655440018",
+      "page": "/products",
+      "duration": 130,
+      "metadata": {
+        "device": "mobile",
+        "browser": "Safari",
+        "version": "17.2.0"
+      },
+      "tags": ["new_user", "organic"],
+      "conversion": null,
+      "revenue": null
+    },
+    {
+      "id": 1030,
+      "timestamp": "2025-01-15T10:29:00Z",
+      "type": "page_view",
+      "user_id": "550e8400-e29b-41d4-a716-446655440019",
+      "page": "/home",
+      "duration": 42,
+      "metadata": {
+        "device": "desktop",
+        "browser": "Chrome",
+        "version": "120.0.0"
+      },
+      "tags": ["new_user", "paid_ad"],
+      "conversion": null,
+      "revenue": null
+    },
+    {
+      "id": 1031,
+      "timestamp": "2025-01-15T10:30:00Z",
+      "type": "page_view",
+      "user_id": "550e8400-e29b-41d4-a716-446655440020",
+      "page": "/products",
+      "duration": 160,
+      "metadata": {
+        "device": "mobile",
+        "browser": "Chrome",
+        "version": "120.0.0"
+      },
+      "tags": ["new_user", "organic"],
+      "conversion": null,
+      "revenue": null
+    },
+    {
+      "id": 1032,
+      "timestamp": "2025-01-15T10:31:00Z",
+      "type": "click",
+      "user_id": "550e8400-e29b-41d4-a716-446655440020",
+      "page": "/products",
+      "duration": 4,
+      "metadata": {
+        "device": "mobile",
+        "browser": "Chrome",
+        "version": "120.0.0",
+        "element": "buy_button"
+      },
+      "tags": ["intent"],
+      "conversion": null,
+      "revenue": null
+    },
+    {
+      "id": 1033,
+      "timestamp": "2025-01-15T10:32:00Z",
+      "type": "purchase",
+      "user_id": "550e8400-e29b-41d4-a716-446655440020",
+      "page": "/checkout",
+      "duration": 190,
+      "metadata": {
+        "device": "mobile",
+        "browser": "Chrome",
+        "version": "120.0.0",
+        "payment_method": "card"
+      },
+      "tags": ["conversion", "organic"],
+      "conversion": true,
+      "revenue": 79.99
+    },
+    {
+      "id": 1034,
+      "timestamp": "2025-01-15T10:33:00Z",
+      "type": "page_view",
+      "user_id": "550e8400-e29b-41d4-a716-446655440000",
+      "page": "/about",
+      "duration": 20,
+      "metadata": {
+        "device": "mobile",
+        "browser": "Chrome",
+        "version": "120.0.0"
+      },
+      "tags": ["organic"],
+      "conversion": null,
+      "revenue": null
+    },
+    {
+      "id": 1035,
+      "timestamp": "2025-01-15T10:34:00Z",
+      "type": "page_view",
+      "user_id": "550e8400-e29b-41d4-a716-446655440021",
+      "page": "/home",
+      "duration": 70,
+      "metadata": {
+        "device": "desktop",
+        "browser": "Chrome",
+        "version": "120.0.0"
+      },
+      "tags": ["new_user", "paid_ad"],
+      "conversion": null,
+      "revenue": null
+    },
+    {
+      "id": 1036,
+      "timestamp": "2025-01-15T10:35:00Z",
+      "type": "page_view",
+      "user_id": "550e8400-e29b-41d4-a716-446655440022",
+      "page": "/products",
+      "duration": 105,
+      "metadata": {
+        "device": "mobile",
+        "browser": "Safari",
+        "version": "17.2.0"
+      },
+      "tags": ["new_user", "organic"],
+      "conversion": null,
+      "revenue": null
+    },
+    {
+      "id": 1037,
+      "timestamp": "2025-01-15T10:36:00Z",
+      "type": "page_view",
+      "user_id": "550e8400-e29b-41d4-a716-446655440023",
+      "page": "/home",
+      "duration": 38,
+      "metadata": {
+        "device": "mobile",
+        "browser": "Chrome",
+        "version": "120.0.0"
+      },
+      "tags": ["new_user", "paid_ad"],
+      "conversion": null,
+      "revenue": null
+    },
+    {
+      "id": 1038,
+      "timestamp": "2025-01-15T10:37:00Z",
+      "type": "page_view",
+      "user_id": "550e8400-e29b-41d4-a716-446655440024",
+      "page": "/products",
+      "duration": 125,
+      "metadata": {
+        "device": "desktop",
+        "browser": "Chrome",
+        "version": "120.0.0"
+      },
+      "tags": ["new_user", "organic"],
+      "conversion": null,
+      "revenue": null
+    },
+    {
+      "id": 1039,
+      "timestamp": "2025-01-15T10:38:00Z",
+      "type": "page_view",
+      "user_id": "550e8400-e29b-41d4-a716-446655440025",
+      "page": "/home",
+      "duration": 58,
+      "metadata": {
+        "device": "mobile",
+        "browser": "Chrome",
+        "version": "120.0.0"
+      },
+      "tags": ["new_user", "paid_ad"],
+      "conversion": null,
+      "revenue": null
+    },
+    {
+      "id": 1040,
+      "timestamp": "2025-01-15T10:39:00Z",
+      "type": "page_view",
+      "user_id": "550e8400-e29b-41d4-a716-446655440026",
+      "page": "/products",
+      "duration": 115,
+      "metadata": {
+        "device": "desktop",
+        "browser": "Edge",
+        "version": "120.0.0"
+      },
+      "tags": ["new_user", "organic"],
+      "conversion": null,
+      "revenue": null
+    }
+  ]
+}

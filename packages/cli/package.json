@@ -1,0 +1,51 @@
+{
+  "name": "@axon-format/cli",
+  "version": "0.5.2",
+  "description": "Command-line tool for AXON operations",
+  "bin": {
+    "axon": "./dist/index.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs --dts --clean",
+    "dev": "tsup src/index.ts --format cjs --dts --watch",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "axon",
+    "cli",
+    "serialization",
+    "llm",
+    "data-format",
+    "token-efficiency",
+    "compression"
+  ],
+  "author": "Wael",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/savetokens/axon.git",
+    "directory": "packages/cli"
+  },
+  "homepage": "https://github.com/savetokens/axon#readme",
+  "bugs": {
+    "url": "https://github.com/savetokens/axon/issues"
+  },
+  "dependencies": {
+    "@axon-format/core": "^0.5.1",
+    "chalk": "^4.1.2",
+    "commander": "^11.1.0",
+    "ora": "^5.4.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "tsup": "^8.0.1",
+    "typescript": "^5.3.3",
+    "vitest": "^1.2.0"
+  }
+}

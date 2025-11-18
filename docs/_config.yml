@@ -1,0 +1,35 @@
+title: AXON
+description: Token-efficient data serialization for LLMs
+theme: jekyll-theme-cayman
+
+# Site settings
+baseurl: ""
+url: "https://axon.savetokens.dev"
+
+# Navigation
+navigation:
+  - title: Home
+    url: /
+  - title: Getting Started
+    url: /guide/getting-started
+  - title: API Reference
+    url: /api/encode-decode
+  - title: Examples
+    url: /examples/rag-pipeline
+  - title: GitHub
+    url: https://github.com/savetokens/axon
+
+# Plugins
+plugins:
+  - jekyll-relative-links
+
+# Markdown settings
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
+# Files to exclude
+exclude:
+  - node_modules
+  - README.md

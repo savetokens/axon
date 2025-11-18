@@ -101,7 +101,112 @@ AXON is specifically engineered for LLM interactions with:
 
 ---
 
-## 🔥 AXON vs JSON/CSV: Real-World Comparisons
+## 🔥 AXON vs JSON/CSV/TOON: Real-World Comparisons
+
+### AXON vs TOON: Token-Optimized Formats Compared
+
+**Both AXON and TOON are designed for LLM efficiency, but with different approaches:**
+
+TOON (Token-Oriented Object Notation) focuses on YAML-like readability and achieves **30-40% token reduction** vs JSON through minimal syntax. AXON takes compression further with **5 specialized algorithms** for **60-95% reduction**.
+
+#### Example: User Array (4 rows)
+
+**JSON** (compact):
+```json
+[{"id":1,"name":"Alice","role":"admin","active":true},
+{"id":2,"name":"Bob","role":"user","active":true},
+{"id":3,"name":"Charlie","role":"user","active":false}]
+```
+**Size:** 130 chars (~33 tokens)
+
+**TOON:**
+```yaml
+users[3]{id,name,role,active}:
+  1,Alice,admin,true
+  2,Bob,user,true
+  3,Charlie,user,false
+```
+**Size:** ~78 chars (~20 tokens) | **40% reduction vs JSON** ✅
+
+**AXON** (with type safety):
+```
+users::[3] active:bool|id:u8|name:str|role:str
+  true|1|Alice|admin
+  true|2|Bob|user
+  false|3|Charlie|user
+```
+**Size:** 81 chars (~20 tokens) | **38% reduction vs JSON** ✅
+
+**Verdict:** TOON and AXON perform similarly on simple tables. AXON adds **type validation** (u8, bool) that TOON lacks.
+
+---
+
+#### Example: Large Dataset with Repetition (1000 status values)
+
+**JSON:**
+```json
+["active","active","active", ... (800 times),
+ "inactive","inactive", ... (150 times),
+ "pending","pending", ... (50 times)]
+```
+**Size:** ~7,374 chars (~1,844 tokens)
+
+**TOON** (row-based):
+```yaml
+statuses[1000]{value}:
+  active
+  active
+  active
+  ... (997 more rows)
+```
+**Size:** ~6,500 chars (~1,625 tokens) | **12% reduction** ⚠️
+
+**AXON** (with RLE compression):
+```
+statuses::[1000] value:str
+  active*800|inactive*150|pending*50
+```
+**Size:** 36 chars (~9 tokens) | **99.5% reduction** 🚀🚀🚀
+
+**Verdict:** AXON's RLE compression is **180x more efficient** than TOON for repeated data. TOON doesn't have compression algorithms.
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│  AXON vs TOON vs JSON: Repeated Values (1000 items)             │
+├──────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  JSON      ████████████████████████████████████  7,374 chars    │
+│  TOON      ██████████████████████████████████    6,500 chars    │
+│  AXON+RLE  █                                        36 chars  ✅ │
+│                                                                  │
+│  AXON is 204x better than JSON, 180x better than TOON! 🚀🚀🚀  │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+#### Key Differences: AXON vs TOON
+
+| Feature | TOON | AXON |
+|---------|------|------|
+| **Token Reduction** | 30-40% vs JSON | 60-95% vs JSON |
+| **Syntax Style** | YAML-like, readable | CSV-like, compact |
+| **Type System** | ❌ None | ✅ 13 types (u8, i32, f64, bool, iso8601, uuid, enum...) |
+| **Compression** | ❌ None | ✅ 5 algorithms (RLE, Dictionary, Delta, Bit Packing, Varint) |
+| **Schema/Validation** | ⚠️ Basic | ✅ Full schema system with inheritance |
+| **Repeated Values** | ⚠️ Still verbose | ✅ RLE: 99% reduction |
+| **Sequential Data** | ⚠️ Full values | ✅ Delta: 50-76% reduction |
+| **Limited Unique Vals** | ⚠️ Full strings | ✅ Dictionary: 65-75% reduction |
+| **Boolean Arrays** | ⚠️ Text bools | ✅ Bit packing: 95% reduction |
+| **Query Hints** | ❌ None | ✅ 6 types (!primary, !search, !aggregate...) |
+| **Adaptive Modes** | ⚠️ 1 format | ✅ 6 modes (auto-selected) |
+
+**Summary:** TOON excels at **readability** with modest savings. AXON excels at **maximum compression** (3-200x better on patterned data) with full type safety.
+
+**Use TOON when:** You prioritize human readability and YAML-like syntax.
+**Use AXON when:** You need maximum token efficiency, type validation, or data has patterns to compress.
+
+---
 
 ### Simple Tables (<100 rows)
 

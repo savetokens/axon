@@ -1,0 +1,15 @@
+# Build outputs
+dist/
+node_modules/
+
+# Environment
+.env
+
+# System
+.DS_Store
+
+# Internal files
+.internal/
+.history/
+.claude/
+coverage/

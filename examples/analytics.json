@@ -1,0 +1,11 @@
+{
+  "metrics": [
+    { "date": "2025-01-01", "views": 1250, "clicks": 68, "conversions": 8, "revenue": 799.92 },
+    { "date": "2025-01-02", "views": 1180, "clicks": 62, "conversions": 7, "revenue": 699.93 },
+    { "date": "2025-01-03", "views": 1420, "clicks": 75, "conversions": 9, "revenue": 899.91 },
+    { "date": "2025-01-04", "views": 980, "clicks": 51, "conversions": 5, "revenue": 499.95 },
+    { "date": "2025-01-05", "views": 1350, "clicks": 71, "conversions": 8, "revenue": 799.92 },
+    { "date": "2025-01-06", "views": 1150, "clicks": 60, "conversions": 6, "revenue": 599.94 },
+    { "date": "2025-01-07", "views": 1280, "clicks": 67, "conversions": 7, "revenue": 699.93 }
+  ]
+}
