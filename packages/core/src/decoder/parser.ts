@@ -1,6 +1,7 @@
 import type { Token, ASTNode, ObjectNode, ArrayNode, PrimitiveNode } from '../types';
 import { TokenType } from '../types';
 import { AXONParseError } from '../utils/errors';
+import { decompressRLE, decompressDelta, parseDictionary, parseIndices, decompressDictionary } from './decompressor';
 
 /**
  * Parser for building AST from tokens
@@ -199,37 +200,22 @@ export class Parser {
     // Parse field definitions (compact mode)
     const fieldDefs: string[] = [];
     const fieldTypes: string[] = [];
+    const fieldCompression: Map<string, string> = new Map();
 
     // Parse first field
     if (this.check(TokenType.IDENTIFIER)) {
-      const fieldName = this.advance().value;
-      let fieldType = 'str';
-
-      // Check for type annotation (field:type)
-      if (this.check(TokenType.COLON)) {
-        this.advance();
-        const typeToken = this.consume(TokenType.IDENTIFIER, 'Expected type name');
-        fieldType = typeToken.value;
-      }
-
+      const { fieldName, fieldType, compression } = this.parseFieldDef();
       fieldDefs.push(fieldName);
       fieldTypes.push(fieldType);
+      if (compression) fieldCompression.set(fieldName, compression);
 
       // Parse remaining fields
       while (this.check(TokenType.PIPE)) {
         this.advance();
-        const fieldName = this.consume(TokenType.IDENTIFIER, 'Expected field name').value;
-        let fieldType = 'str';
-
-        // Check for type annotation
-        if (this.check(TokenType.COLON)) {
-          this.advance();
-          const typeToken = this.consume(TokenType.IDENTIFIER, 'Expected type name');
-          fieldType = typeToken.value;
-        }
-
+        const { fieldName, fieldType, compression } = this.parseFieldDef();
         fieldDefs.push(fieldName);
         fieldTypes.push(fieldType);
+        if (compression) fieldCompression.set(fieldName, compression);
       }
     }
 
@@ -241,82 +227,104 @@ export class Parser {
       this.skipWhitespace();
     }
 
-    // Parse data rows
+    // Parse compression directives (@rle:field, @dict:field, etc.)
+    const compressionData = new Map<string, any[]>();
+    const dictionaries = new Map<string, string[]>();
+
+    while (this.check(TokenType.AT)) {
+      const directive = this.parseCompressionDirective();
+      if (!directive) break;
+
+      const { type, field, data } = directive;
+
+      if (type === 'dict') {
+        // Store dictionary for later use with @idx
+        dictionaries.set(field, parseDictionary(data));
+      } else if (type === 'idx') {
+        // Apply dictionary to indices
+        const dict = dictionaries.get(field);
+        if (dict) {
+          const indices = parseIndices(data);
+          compressionData.set(field, decompressDictionary(dict, indices));
+        }
+      } else if (type === 'rle') {
+        compressionData.set(field, decompressRLE(data));
+      } else if (type === 'delta') {
+        compressionData.set(field, decompressDelta(data));
+      }
+
+      this.skipWhitespace();
+    }
+
+    // Check if all fields are compressed (skip row data)
+    const allFieldsCompressed = fieldDefs.every((f) => compressionData.has(f));
+
+    // Parse data rows (unless all fields are compressed)
     const items: ASTNode[] = [];
 
-    for (let i = 0; i < count; i++) {
-      this.skipWhitespace();
-
-      if (this.isAtEnd()) {
-        break;
+    if (allFieldsCompressed && compressionData.size > 0) {
+      // Build items from compression data
+      for (let i = 0; i < count; i++) {
+        const row = new Map<string, ASTNode>();
+        for (const field of fieldDefs) {
+          const values = compressionData.get(field);
+          const value = values?.[i];
+          row.set(field, {
+            type: 'primitive',
+            valueType: this.inferValueType(value),
+            value,
+          });
+        }
+        items.push({ type: 'object', fields: row });
       }
+    } else {
+      // Parse row data normally
+      for (let i = 0; i < count; i++) {
+        this.skipWhitespace();
 
-      // Parse row as object
-      const row = new Map<string, ASTNode>();
-
-      for (let j = 0; j < fieldDefs.length; j++) {
-        const fieldName = fieldDefs[j]!;
-        const fieldType = fieldTypes[j]!;
-
-        // Parse value
-        let value: ASTNode;
-
-        if (this.check(TokenType.STRING)) {
-          const token = this.advance();
-          value = {
-            type: 'primitive',
-            valueType: 'str',
-            value: token.value,
-          };
-        } else if (this.check(TokenType.NUMBER)) {
-          const token = this.advance();
-          const numValue = token.value.includes('.') ? parseFloat(token.value) : parseInt(token.value, 10);
-          const numType = fieldType.startsWith('f') ? 'f32' : 'i32';
-          value = {
-            type: 'primitive',
-            valueType: numType as any,
-            value: numValue,
-          };
-        } else if (this.check(TokenType.BOOLEAN)) {
-          const token = this.advance();
-          value = {
-            type: 'primitive',
-            valueType: 'bool',
-            value: token.value === 'true',
-          };
-        } else if (this.check(TokenType.NULL)) {
-          this.advance();
-          value = {
-            type: 'primitive',
-            valueType: 'null',
-            value: null,
-          };
-        } else if (this.check(TokenType.IDENTIFIER)) {
-          // Unquoted string
-          const token = this.advance();
-          value = {
-            type: 'primitive',
-            valueType: 'str',
-            value: token.value,
-          };
-        } else {
-          throw this.error('Expected value');
+        if (this.isAtEnd()) {
+          break;
         }
 
-        row.set(fieldName, value);
+        // Parse row as object
+        const row = new Map<string, ASTNode>();
 
-        // Expect pipe between fields (except last)
-        if (j < fieldDefs.length - 1) {
-          this.consume(TokenType.PIPE, 'Expected "|" between fields');
+        for (let j = 0; j < fieldDefs.length; j++) {
+          const fieldName = fieldDefs[j]!;
+          const fieldType = fieldTypes[j]!;
+
+          // Check if this field has compression data
+          if (compressionData.has(fieldName)) {
+            // Skip the placeholder (~) if present
+            if (this.check(TokenType.TILDE)) {
+              this.advance();
+            }
+            // Use decompressed value
+            const values = compressionData.get(fieldName)!;
+            row.set(fieldName, {
+              type: 'primitive',
+              valueType: this.inferValueType(values[i]),
+              value: values[i],
+            });
+          } else {
+            // Parse value normally
+            const value = this.parseRowValue(fieldType);
+            row.set(fieldName, value);
+          }
+
+          // Expect pipe between fields (except last)
+          if (j < fieldDefs.length - 1) {
+            this.consume(TokenType.PIPE, 'Expected "|" between fields');
+          }
         }
+
+        items.push({
+          type: 'object',
+          fields: row,
+        });
+
+        this.skipWhitespace();
       }
-
-      items.push({
-        type: 'object',
-        fields: row,
-      });
-
-      this.skipWhitespace();
     }
 
     return {
@@ -324,7 +332,132 @@ export class Parser {
       name: name ?? undefined,
       count,
       items,
+      compressionData: compressionData.size > 0 ? compressionData : undefined,
     };
+  }
+
+  /**
+   * Parse a field definition (name:type@compression)
+   */
+  private parseFieldDef(): { fieldName: string; fieldType: string; compression: string | undefined } {
+    const fieldName = this.consume(TokenType.IDENTIFIER, 'Expected field name').value;
+    let fieldType = 'str';
+    let compression: string | undefined = undefined;
+
+    // Check for type annotation (field:type or field:type@compression)
+    if (this.check(TokenType.COLON)) {
+      this.advance();
+      // Type might include @compression marker
+      const typeToken = this.consume(TokenType.IDENTIFIER, 'Expected type name');
+      const typeParts = typeToken.value.split('@');
+      fieldType = typeParts[0]!;
+      compression = typeParts[1];
+    }
+
+    // Check for standalone @ compression marker
+    if (this.check(TokenType.AT)) {
+      this.advance();
+      compression = this.consume(TokenType.IDENTIFIER, 'Expected compression type').value;
+    }
+
+    return { fieldName, fieldType, compression };
+  }
+
+  /**
+   * Parse a row value
+   */
+  private parseRowValue(fieldType: string): ASTNode {
+    if (this.check(TokenType.STRING)) {
+      const token = this.advance();
+      return {
+        type: 'primitive',
+        valueType: 'str',
+        value: token.value,
+      };
+    } else if (this.check(TokenType.NUMBER)) {
+      const token = this.advance();
+      const numValue = token.value.includes('.') ? parseFloat(token.value) : parseInt(token.value, 10);
+      const numType = fieldType.startsWith('f') ? 'f32' : 'i32';
+      return {
+        type: 'primitive',
+        valueType: numType as any,
+        value: numValue,
+      };
+    } else if (this.check(TokenType.BOOLEAN)) {
+      const token = this.advance();
+      return {
+        type: 'primitive',
+        valueType: 'bool',
+        value: token.value === 'true',
+      };
+    } else if (this.check(TokenType.NULL)) {
+      this.advance();
+      return {
+        type: 'primitive',
+        valueType: 'null',
+        value: null,
+      };
+    } else if (this.check(TokenType.TILDE)) {
+      // Placeholder for compressed field
+      this.advance();
+      return {
+        type: 'primitive',
+        valueType: 'null',
+        value: null,
+      };
+    } else if (this.check(TokenType.IDENTIFIER)) {
+      // Unquoted string
+      const token = this.advance();
+      return {
+        type: 'primitive',
+        valueType: 'str',
+        value: token.value,
+      };
+    } else {
+      throw this.error('Expected value');
+    }
+  }
+
+  /**
+   * Parse compression directive line (@rle:field data)
+   */
+  private parseCompressionDirective(): { type: string; field: string; data: string } | null {
+    if (!this.check(TokenType.AT)) return null;
+
+    this.advance(); // consume @
+
+    // Get directive type (rle, dict, idx, delta)
+    if (!this.check(TokenType.IDENTIFIER)) return null;
+    const type = this.advance().value;
+
+    // Expect colon
+    if (!this.check(TokenType.COLON)) return null;
+    this.advance();
+
+    // Get field name
+    if (!this.check(TokenType.IDENTIFIER)) return null;
+    const field = this.advance().value;
+
+    this.skipWhitespace();
+
+    // Collect remaining tokens on line as data
+    const dataTokens: string[] = [];
+    while (!this.check(TokenType.NEWLINE) && !this.check(TokenType.AT) && !this.isAtEnd()) {
+      const token = this.advance();
+      dataTokens.push(token.value);
+    }
+
+    return { type, field, data: dataTokens.join('') };
+  }
+
+  /**
+   * Infer primitive value type
+   */
+  private inferValueType(value: any): any {
+    if (value === null) return 'null';
+    if (typeof value === 'boolean') return 'bool';
+    if (typeof value === 'number') return Number.isInteger(value) ? 'i32' : 'f32';
+    return 'str';
   }
 
   /**

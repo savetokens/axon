@@ -1,5 +1,20 @@
 import type { EncodeOptions } from '../types';
-import { analyzeData, inferType } from './analyzer';
+import { analyzeData, inferType, inferTypeForField } from './analyzer';
+import { selectMode } from './mode-selector';
+import { encodeColumnar } from './modes/columnar';
+import { encodeStream } from './modes/stream';
+import { encodeSparse } from './modes/sparse';
+import {
+  analyzeCompression,
+  encodeRLE,
+  encodeDelta,
+  encodeDictionary,
+  type CompressionRecommendation,
+} from './compression-analyzer';
+import { AXONError } from '../utils/errors';
+
+/** Maximum nesting depth allowed */
+const MAX_DEPTH = 100;
 
 /**
  * Serialize JavaScript value to AXON string
@@ -7,6 +22,8 @@ import { analyzeData, inferType } from './analyzer';
 export class Serializer {
   private indent: number;
   private delimiter: string;
+  /** Stack of objects currently being serialized (for circular detection) */
+  private serializationStack: WeakSet<object> = new WeakSet();
 
   constructor(private _options: EncodeOptions = {}) {
     this.indent = _options.indent ?? 2;
@@ -14,9 +31,66 @@ export class Serializer {
   }
 
   /**
+   * Check for circular reference (object in current serialization path)
+   */
+  private enterObject(value: object): void {
+    if (this.serializationStack.has(value)) {
+      throw new AXONError('Circular reference detected');
+    }
+    this.serializationStack.add(value);
+  }
+
+  /**
+   * Leave object (done serializing, allow it to appear elsewhere)
+   */
+  private leaveObject(value: object): void {
+    this.serializationStack.delete(value);
+  }
+
+  /**
+   * Check depth limit
+   */
+  private checkDepth(depth: number): void {
+    if (depth > MAX_DEPTH) {
+      throw new AXONError(`Maximum nesting depth exceeded (${MAX_DEPTH})`);
+    }
+  }
+
+  /**
    * Serialize value to AXON
    */
   public serialize(value: any, name?: string): string {
+    // Reset stack for each top-level serialize call
+    this.serializationStack = new WeakSet();
+
+    // Select mode based on data characteristics
+    const mode = selectMode(value, { mode: this._options.mode });
+
+    // Route to appropriate serializer based on mode
+    switch (mode) {
+      case 'columnar':
+        return this.serializeColumnar(value, name);
+      case 'stream':
+        return this.serializeStream(value, name);
+      case 'sparse':
+        return this.serializeSparse(value, name);
+      case 'json':
+        return JSON.stringify(value, null, this.indent);
+      case 'compact':
+      case 'nested':
+      default:
+        // Default behavior - analyze and route
+        return this.serializeDefault(value, name, 0);
+    }
+  }
+
+  /**
+   * Default serialization logic (compact/nested)
+   */
+  private serializeDefault(value: any, name?: string, depth: number = 0): string {
+    // Check depth limit
+    this.checkDepth(depth);
+
     // Analyze if array
     if (Array.isArray(value)) {
       const analysis = analyzeData(value);
@@ -27,7 +101,7 @@ export class Serializer {
       }
 
       // Non-uniform array -> inline array
-      return this.serializeInlineArray(value, name);
+      return this.serializeInlineArray(value, name, depth);
     }
 
     // Object - check if it's a simple wrapper with one array field
@@ -38,10 +112,10 @@ export class Serializer {
       if (keys.length === 1 && Array.isArray(value[keys[0]!])) {
         const fieldName = keys[0]!;
         const arrayValue = value[fieldName];
-        return this.serialize(arrayValue, fieldName);
+        return this.serializeDefault(arrayValue, fieldName, depth + 1);
       }
 
-      return this.serializeObject(value, name);
+      return this.serializeObject(value, name, depth);
     }
 
     // Primitive
@@ -49,15 +123,60 @@ export class Serializer {
   }
 
   /**
+   * Serialize using columnar mode
+   */
+  private serializeColumnar(value: any, name?: string): string {
+    if (!Array.isArray(value)) {
+      return this.serializeDefault(value, name);
+    }
+    return encodeColumnar(value, name, 0);
+  }
+
+  /**
+   * Serialize using stream mode
+   */
+  private serializeStream(value: any, name?: string): string {
+    if (!Array.isArray(value)) {
+      return this.serializeDefault(value, name);
+    }
+    return encodeStream(value, name);
+  }
+
+  /**
+   * Serialize using sparse mode
+   */
+  private serializeSparse(value: any, name?: string): string {
+    if (!Array.isArray(value) || value.length === 0) {
+      return this.serializeDefault(value, name);
+    }
+    const fields = Object.keys(value[0] || {});
+    return encodeSparse(value, fields, name);
+  }
+
+  /**
    * Serialize compact mode array
    */
   private serializeCompactArray(items: any[], fields: string[], name?: string): string {
+    // Analyze compression if enabled
+    let compressionMap: Map<string, CompressionRecommendation> = new Map();
+    if (this._options.compression && items.length >= 10) {
+      const recommendations = analyzeCompression(items);
+      for (const rec of recommendations) {
+        compressionMap.set(rec.field, rec);
+      }
+    }
+
     const lines: string[] = [];
 
-    // Header: name::[count] field1:type|field2:type|...
+    // Header: name::[count] field1:type@compression|field2:type|...
     const count = items.length;
     const fieldDefs = fields.map((field) => {
-      const type = inferType(items[0]?.[field]);
+      // Use inferTypeForField to check ALL items for widest type
+      const type = inferTypeForField(items, field);
+      const compression = compressionMap.get(field);
+      if (compression && compression.algorithm !== 'none') {
+        return `${field}:${type}@${compression.algorithm}`;
+      }
       return `${field}:${type}`;
     });
 
@@ -67,9 +186,43 @@ export class Serializer {
 
     lines.push(header);
 
-    // Data rows
+    // Output compression directives if any
+    const compressedFields = new Set<string>();
+    for (const [field, rec] of compressionMap) {
+      const values = items.map((item) => item[field]);
+
+      if (rec.algorithm === 'dictionary') {
+        const { dict, indices } = encodeDictionary(values.map(String));
+        lines.push(`@dict:${field} [${dict.join(', ')}]`);
+        lines.push(`@idx:${field} ${indices.join(',')}`);
+        compressedFields.add(field);
+      } else if (rec.algorithm === 'rle') {
+        const encoded = encodeRLE(values);
+        lines.push(`@rle:${field} ${encoded}`);
+        compressedFields.add(field);
+      } else if (rec.algorithm === 'delta') {
+        const numericValues = values.filter((v) => typeof v === 'number') as number[];
+        if (numericValues.length === values.length) {
+          const encoded = encodeDelta(numericValues);
+          lines.push(`@delta:${field} ${encoded}`);
+          compressedFields.add(field);
+        }
+      }
+    }
+
+    // If all fields are compressed, skip row data
+    if (compressedFields.size === fields.length) {
+      return lines.join('\n');
+    }
+
+    // Data rows (only for non-compressed fields or when not all compressed)
     for (const item of items) {
-      const values = fields.map((field) => this.formatValue(item[field]));
+      const values = fields.map((field) => {
+        if (compressedFields.has(field)) {
+          return '~'; // Placeholder for compressed field
+        }
+        return this.formatValue(item[field]);
+      });
       lines.push(`  ${values.join(this.delimiter)}`);
     }
 
@@ -79,9 +232,13 @@ export class Serializer {
   /**
    * Serialize inline array
    */
-  private serializeInlineArray(items: any[], name?: string): string {
+  private serializeInlineArray(items: any[], name?: string, depth: number = 0): string {
+    this.checkDepth(depth);
+
     const count = items.length;
-    const values = items.map((item) => this.formatValue(item)).join(', ');
+    const values = items.map((item) => {
+      return this.formatValue(item, depth + 1);
+    }).join(', ');
 
     if (name) {
       return `${name}::[${count}]: ${values}`;
@@ -93,43 +250,54 @@ export class Serializer {
    * Serialize object
    */
   private serializeObject(obj: Record<string, any>, name?: string, level: number = 0): string {
-    const lines: string[] = [];
-    const indentStr = ' '.repeat(level * this.indent);
+    // Check depth limit
+    this.checkDepth(level);
 
-    if (name) {
-      lines.push(`${indentStr}${name}: {`);
-    } else {
-      lines.push(`${indentStr}{`);
-    }
+    // Enter this object for circular detection
+    this.enterObject(obj);
 
-    for (const [key, value] of Object.entries(obj)) {
-      const valueIndent = ' '.repeat((level + 1) * this.indent);
+    try {
+      const lines: string[] = [];
+      const indentStr = ' '.repeat(level * this.indent);
 
-      if (Array.isArray(value)) {
-        // Nested array - use inline format with count
-        const count = value.length;
-        const values = value.map(v => this.formatValue(v)).join(', ');
-        lines.push(`${valueIndent}${key}: [${count}]: ${values}`);
-      } else if (typeof value === 'object' && value !== null) {
-        // Nested object
-        const nested = this.serializeObject(value, key, level + 1);
-        lines.push(nested);
+      if (name) {
+        lines.push(`${indentStr}${name}: {`);
       } else {
-        // Primitive
-        const type = inferType(value);
-        lines.push(`${valueIndent}${key}:${type}: ${this.formatValue(value)}`);
+        lines.push(`${indentStr}{`);
       }
+
+      for (const [key, value] of Object.entries(obj)) {
+        const valueIndent = ' '.repeat((level + 1) * this.indent);
+
+        if (Array.isArray(value)) {
+          // Nested array - use inline format with count
+          const count = value.length;
+          const values = value.map(v => this.formatValue(v, level + 1)).join(', ');
+          lines.push(`${valueIndent}${key}: [${count}]: ${values}`);
+        } else if (typeof value === 'object' && value !== null) {
+          // Nested object - will check circular inside serializeObject
+          const nested = this.serializeObject(value, key, level + 1);
+          lines.push(nested);
+        } else {
+          // Primitive
+          const type = inferType(value);
+          lines.push(`${valueIndent}${key}:${type}: ${this.formatValue(value)}`);
+        }
+      }
+
+      lines.push(`${indentStr}}`);
+
+      return lines.join('\n');
+    } finally {
+      // Leave this object to allow it to appear elsewhere
+      this.leaveObject(obj);
     }
-
-    lines.push(`${indentStr}}`);
-
-    return lines.join('\n');
   }
 
   /**
    * Format a value for output
    */
-  private formatValue(value: any): string {
+  private formatValue(value: any, depth: number = 0): string {
     if (value === null) return 'null';
     if (typeof value === 'boolean') return value.toString();
     if (typeof value === 'number') return value.toString();
@@ -143,10 +311,13 @@ export class Serializer {
     }
 
     if (Array.isArray(value)) {
-      return `[${value.map((v) => this.formatValue(v)).join(', ')}]`;
+      this.checkDepth(depth);
+      return `[${value.map((v) => this.formatValue(v, depth + 1)).join(', ')}]`;
     }
 
     if (typeof value === 'object') {
+      this.checkDepth(depth);
+      // JSON.stringify has its own circular reference detection
       return JSON.stringify(value);
     }
 

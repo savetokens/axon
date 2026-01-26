@@ -4,7 +4,7 @@
  * Best for: Large datasets (1000+ rows), numeric-heavy data, analytics
  */
 
-import { inferType } from '../analyzer';
+import { inferTypeForField } from '../analyzer';
 
 /**
  * Check if columnar mode should be used
@@ -20,11 +20,12 @@ export function shouldUseColumnar(data: any[]): boolean {
     return false;
   }
 
-  // Check if uniform
-  const firstKeys = Object.keys(data[0] || {}).sort();
+  // Check if uniform - use Set comparison to ignore order
+  const firstKeys = Object.keys(data[0] || {});
+  const firstKeySet = new Set(firstKeys);
   const isUniform = data.every((item) => {
-    const keys = Object.keys(item).sort();
-    return keys.length === firstKeys.length && keys.every((k, i) => k === firstKeys[i]);
+    const keys = Object.keys(item);
+    return keys.length === firstKeys.length && keys.every((k) => firstKeySet.has(k));
   });
 
   if (!isUniform) {
@@ -52,7 +53,7 @@ export function encodeColumnar(data: any[], name?: string, indent: number = 0): 
     return name ? `${name}::[0]@columnar:` : '::[0]@columnar:';
   }
 
-  const fields = Object.keys(data[0]!).sort();
+  const fields = Object.keys(data[0]!); // Preserve insertion order
   const lines: string[] = [];
   const indentStr = ' '.repeat(indent);
 
@@ -63,7 +64,8 @@ export function encodeColumnar(data: any[], name?: string, indent: number = 0): 
   // Column data
   for (const field of fields) {
     const values = data.map((item) => item[field]);
-    const type = inferType(values[0]);
+    // Use inferTypeForField to check ALL values for widest type
+    const type = inferTypeForField(data, field);
 
     // Format column
     const valueStr = values.map((v) => formatValue(v)).join(', ');

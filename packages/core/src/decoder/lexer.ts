@@ -168,6 +168,21 @@ export class Lexer {
         this.addToken(TokenType.EQUALS, '=');
         break;
 
+      case '*':
+        this.advance();
+        this.addToken(TokenType.ASTERISK, '*');
+        break;
+
+      case '~':
+        this.advance();
+        this.addToken(TokenType.TILDE, '~');
+        break;
+
+      case '#':
+        // # style comments (AXON stats output uses this)
+        this.scanHashComment();
+        break;
+
       default:
         throw new AXONParseError(
           `Unexpected character: '${char}'`,
@@ -329,6 +344,24 @@ export class Lexer {
 
     // Skip //
     this.advance();
+    this.advance();
+
+    // Read until newline
+    while (this.peek() !== '\n' && !this.isAtEnd()) {
+      this.advance();
+    }
+
+    const value = this.input.substring(start, this.position);
+    this.addToken(TokenType.COMMENT, value);
+  }
+
+  /**
+   * Scan a hash-style comment (used in stats output)
+   */
+  private scanHashComment(): void {
+    const start = this.position;
+
+    // Skip #
     this.advance();
 
     // Read until newline

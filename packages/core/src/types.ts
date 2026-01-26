@@ -131,6 +131,8 @@ export interface ArrayNode {
   itemType?: string | undefined;
   items: ASTNode[];
   hints?: Map<string, string> | undefined;
+  /** Decompressed column data from compression directives */
+  compressionData?: Map<string, any[]> | undefined;
 }
 
 /**
@@ -230,6 +232,8 @@ export enum TokenType {
   PLUS = 'PLUS', // +
   MINUS = 'MINUS', // -
   EQUALS = 'EQUALS', // =
+  ASTERISK = 'ASTERISK', // *
+  TILDE = 'TILDE', // ~
 
   // Whitespace
   NEWLINE = 'NEWLINE',
