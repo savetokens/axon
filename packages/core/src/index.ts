@@ -81,3 +81,6 @@ export * from './encoder/query-hints';
 
 // Summary Statistics (Phase 3)
 export * from './encoder/summary-stats';
+
+// XML Support (Phase 4)
+export * from './xml';
