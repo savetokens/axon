@@ -7,7 +7,7 @@
 A compression layer for LLM tool outputs. Reduces token usage by 85-95% for structured data with repeated patterns.
 
 [![npm](https://img.shields.io/npm/v/@axon-format/core?color=000)](https://npmjs.com/package/@axon-format/core)
-[![tests](https://img.shields.io/badge/tests-405_passing-000)](https://github.com/savetokens/axon/actions)
+[![tests](https://img.shields.io/badge/tests-414_passing-000)](https://github.com/savetokens/axon/actions)
 [![coverage](https://img.shields.io/badge/coverage-93.5%25-000)](https://github.com/savetokens/axon)
 [![license](https://img.shields.io/badge/license-MIT-000)](./LICENSE)
 

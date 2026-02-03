@@ -1,6 +1,6 @@
 {
   "name": "@axon-format/core",
-  "version": "0.5.1",
+  "version": "0.5.3",
   "description": "AXON core encoder/decoder library",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
